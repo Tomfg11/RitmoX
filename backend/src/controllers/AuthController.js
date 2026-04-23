@@ -10,7 +10,8 @@ class AuthController {
       const usuario = await UsuarioRepository.create(nome, email, senhaHash);
       res.status(201).json({ mensagem: 'Usuário criado com sucesso! Aguarde a aprovação de um administrador para fazer login.', usuario });
     } catch (erro) {
-      res.status(500).json({ erro: 'Erro no registro' });
+      console.error('ERRO NO REGISTRO:', erro);
+      res.status(500).json({ erro: 'Erro no registro', detalhes: erro.message });
     }
   }
 
