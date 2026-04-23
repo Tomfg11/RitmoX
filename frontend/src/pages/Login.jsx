@@ -22,9 +22,9 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Orbs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-primary/20 rounded-full blur-[120px] animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-secondary/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+      {/* Background Orbs - Ajustados para mobile */}
+      <div className="absolute top-[-5%] left-[-5%] w-[60%] h-[60%] bg-brand-primary/10 rounded-full blur-[100px] animate-pulse pointer-events-none"></div>
+      <div className="absolute bottom-[-5%] right-[-5%] w-[60%] h-[60%] bg-brand-secondary/10 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDelay: '1s' }}></div>
 
       <div className="max-w-md w-full glass-card rounded-[2.5rem] p-10 relative z-10">
         <div className="text-center mb-12">
