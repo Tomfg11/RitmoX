@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #3b82f6;
+  --color-brand-secondary: #8b5cf6;
+}
+
+/* Base Styles */
+@layer base {
+  body {
+    background-color: var(--color-slate-950);
+    color: var(--color-slate-200);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+/* Glassmorphism Classes */
+@layer components {
+  .glass {
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-card {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(to right, var(--color-brand-primary), var(--color-brand-secondary));
+  }
+}
+
+/* Custom Scrollbar */
+@layer utilities {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Heatmap Colors - Overriding with specific HEX for consistency */
+.react-calendar-heatmap .color-empty { fill: #161b2c !important; } 
+.react-calendar-heatmap .color-scale-1 { fill: #1e3a8a !important; } 
+.react-calendar-heatmap .color-scale-2 { fill: #2563eb !important; }
+.react-calendar-heatmap .color-scale-3 { fill: #3b82f6 !important; }
+.react-calendar-heatmap .color-scale-4 { fill: #60a5fa !important; }
+
+.react-calendar-heatmap text {
+  fill: #64748b !important;
+  font-size: 8px;
+}

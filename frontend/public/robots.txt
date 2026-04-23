@@ -1,0 +1,14 @@
+User-agent: *
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+
+# Impede que bots de clonagem/scraping conhecidos acessem o site
+User-agent: HTTrack
+Disallow: /
+
+User-agent: wget
+Disallow: /
+
+User-agent: curl
+Disallow: /
