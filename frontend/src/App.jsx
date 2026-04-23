@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Planner from './pages/Planner';
 import Habitos from './pages/Habitos';
 import Admin from './pages/Admin';
+import Settings from './pages/Settings';
 
 // Componente para proteger rotas
 function PrivateRoute({ children }) {
@@ -58,8 +59,8 @@ function App() {
           {/* Rotas de negócio */}
           <Route path="/planner" element={<PrivateRoute><Layout><Planner /></Layout></PrivateRoute>} />
           <Route path="/habitos" element={<PrivateRoute><Layout><Habitos /></Layout></PrivateRoute>} />
-          <Route path="/settings" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
-          <Route path="/admin" element={<AdminRoute><Layout><Admin /></Layout></AdminRoute>} />
+          <Route path="/settings" element={<PrivateRoute><Layout><Settings /></Layout></PrivateRoute>} />
+          <Route path="/admin" element={<Navigate to="/settings" />} />
         </Routes>
         </BrowserRouter>
       </NotificationProvider>

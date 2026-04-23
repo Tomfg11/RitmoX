@@ -21,16 +21,15 @@ export default function Dashboard() {
   const { notify } = useNotify();
   const [data, setData] = useState(null);
   const [humorHoje, setHumorHoje] = useState(0);
+  const [error, setError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); 
   const [isResumoModalOpen, setIsResumoModalOpen] = useState(false);
   const [resumoTexto, setResumoTexto] = useState('');
   const [habitoSelecionado, setHabitoSelecionado] = useState(null);
 
   useEffect(() => {
-    loadDashboard();
-    loadHumor();
+    loadInitialData();
     
-    // Notificação inteligente de boas-vindas (apenas uma vez por sessão/login)
     const alreadyGreeted = sessionStorage.getItem('@RitmoX:greeting_shown');
     
     if (!alreadyGreeted) {
@@ -43,35 +42,42 @@ export default function Dashboard() {
     }
   }, []);
 
-  async function loadDashboard() {
+  async function loadInitialData() {
     try {
-      const response = await api.get('/habitos/dashboard');
-      setData(response.data);
-    } catch (error) {
-      console.error("Erro ao carregar dashboard");
+      setError(false);
+      await Promise.all([
+        loadDashboard(),
+        loadHumor()
+      ]);
+    } catch (err) {
+      setError(true);
     }
+  }
+
+  async function loadDashboard() {
+    const response = await api.get('/habitos/dashboard');
+    setData(response.data);
   }
 
   async function loadHumor() {
-    try {
-      const response = await api.get('/humor/hoje');
-      setHumorHoje(response.data.nivel);
-    } catch (error) {
-      console.error("Erro ao carregar humor");
-    }
+    const response = await api.get('/humor/hoje');
+    setHumorHoje(response.data.nivel);
   }
 
   async function handleMoodSelect(nivel) {
+    if (humorHoje > 0) return;
+
     try {
       const response = await api.post('/humor', { nivel });
       setHumorHoje(nivel);
-      // Atualiza XP se houver bônus
+      
       if (data) {
         setData({ ...data, perfil: { ...data.perfil, xp_acumulado: response.data.xp_total } });
       }
-      alert("Humor registrado! +10 XP 🧠");
+
+      notify("Mood Registrado", "Seu humor de hoje foi salvo com sucesso! +10 XP 🧠");
     } catch (error) {
-      alert("Erro ao registrar humor.");
+      notify("Erro", "Não foi possível registrar seu humor.");
     }
   }
 
@@ -89,42 +95,57 @@ export default function Dashboard() {
       setIsResumoModalOpen(false);
       setHabitoSelecionado(null);
       setResumoTexto('');
-      alert("Evolução registrada! 🧠");
+      notify("Evolução", "Insight salvo com sucesso! 🧠");
     } catch (error) {
-      alert("Erro ao salvar o resumo.");
+      notify("Erro", "Não foi possível salvar o resumo.");
     }
   }
 
   async function handleCreateHabito(dados) {
     try {
-      const response = await api.post('/habitos/', {
+      await api.post('/habitos/', {
         titulo: dados.titulo,
         xp_recompensa: dados.xp_recompensa,
         dias_semana: dados.dias_semana,
         frequencia: 'personalizado'
       });
 
-      loadDashboard(); // Recarrega tudo para garantir streaks/dados sincronizados
+      loadDashboard();
       setIsModalOpen(false);
-      alert("Hábito criado com sucesso! 🚀");
+      notify("Sucesso", "Hábito criado com sucesso! 🚀");
     } catch (error) {
-      alert("Erro ao criar hábito.");
+      notify("Erro", "Não foi possível criar o hábito.");
     }
   }
 
   async function handleCheckIn(habitoId) {
     try {
-      const response = await api.post(`/habitos/${habitoId}/checkin`, {
+      await api.post(`/habitos/${habitoId}/checkin`, {
         notas_de_reflexao: "Check-in realizado pelo Dashboard!"
       });
 
-      // Recarrega o dashboard para ver o streak e XP atualizados
       loadDashboard();
-      alert("Boa! XP computado. 🔥");
+      notify("Boa!", "XP computado com sucesso. 🔥");
     } catch (error) {
-      alert(error.response?.data?.erro || "Erro ao fazer check-in");
+      notify("Atenção", error.response?.data?.erro || "Erro ao fazer check-in");
     }
   }
+
+  if (error) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 px-4 text-center">
+      <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center text-3xl">⚠️</div>
+      <div>
+        <h2 className="text-white font-bold text-xl mb-2">Ops! Problema na conexão</h2>
+        <p className="text-slate-400 max-w-xs mx-auto">Não conseguimos sincronizar seu ritmo. Verifique sua internet ou tente novamente.</p>
+      </div>
+      <button 
+        onClick={loadInitialData}
+        className="px-8 py-3 bg-brand-primary text-white font-bold rounded-2xl shadow-lg shadow-brand-primary/20 hover:scale-105 active:scale-95 transition-all"
+      >
+        Tentar Novamente
+      </button>
+    </div>
+  );
 
   if (!data) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
@@ -153,7 +174,8 @@ export default function Dashboard() {
               <button 
                 key={i} 
                 onClick={() => handleMoodSelect(i + 1)}
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-all hover:scale-110 active:scale-95 ${humorHoje === i + 1 ? 'bg-brand-primary/20 border-2 border-brand-primary shadow-lg shadow-brand-primary/20' : 'bg-white/5 hover:bg-white/10 border border-white/5'}`}
+                disabled={humorHoje > 0}
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-all ${humorHoje === i + 1 ? 'bg-brand-primary/20 border-2 border-brand-primary shadow-lg shadow-brand-primary/20' : 'bg-white/5 border border-white/5'} ${humorHoje > 0 && humorHoje !== i + 1 ? 'opacity-30 grayscale' : 'hover:scale-110 active:scale-95 hover:bg-white/10'}`}
               >
                 {emoji}
               </button>

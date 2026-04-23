@@ -39,7 +39,7 @@ export default function HabitoModal({ isOpen, onClose, onSave, initialData = nul
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
-      <div className="glass-card w-full max-w-md rounded-[2.5rem] p-10 border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
+      <div className="glass-card w-full max-w-md rounded-[2.5rem] p-6 sm:p-10 border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-black text-white tracking-tight">{initialData ? 'Editar Hábito' : 'Novo Hábito'}</h2>
           <button onClick={onClose} className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-full transition-all"><X className="w-6 h-6" /></button>

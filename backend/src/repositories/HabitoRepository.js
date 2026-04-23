@@ -113,22 +113,39 @@ class HabitoRepository {
 
   async getStreaks(usuarioId) {
     const habitos = await pool.query('SELECT id FROM habitos WHERE usuario_id = $1', [usuarioId]);
+    if (habitos.rows.length === 0) return {};
+
+    const ids = habitos.rows.map(h => h.id);
+    const registros = await pool.query(
+      `SELECT habito_id, data_registro::DATE as data 
+       FROM registros_habitos 
+       WHERE habito_id = ANY($1) 
+       ORDER BY data_registro DESC`, [ids]
+    );
+
     const streaks = {};
+    const registrosPorHabito = {};
     
-    for (const h of habitos.rows) {
-      const registros = await pool.query(
-        `SELECT DISTINCT data_registro::DATE as data 
-         FROM registros_habitos 
-         WHERE habito_id = $1 
-         ORDER BY data_registro DESC`, [h.id]
-      );
+    // Agrupa registros por hábito
+    registros.rows.forEach(reg => {
+      if (!registrosPorHabito[reg.habito_id]) {
+        registrosPorHabito[reg.habito_id] = [];
+      }
       
+      const dataStr = new Date(reg.data).toISOString().split('T')[0];
+      if (!registrosPorHabito[reg.habito_id].includes(dataStr)) {
+        registrosPorHabito[reg.habito_id].push(dataStr);
+      }
+    });
+
+    habitos.rows.forEach(h => {
+      const habitoRegistros = registrosPorHabito[h.id] || [];
       let count = 0;
       let targetDate = new Date();
       targetDate.setHours(0,0,0,0);
       
-      for (const reg of registros.rows) {
-        const regDate = new Date(reg.data);
+      for (const regDateStr of habitoRegistros) {
+        const regDate = new Date(regDateStr);
         regDate.setHours(0,0,0,0);
         
         const diff = Math.floor((targetDate - regDate) / (1000 * 60 * 60 * 24));
@@ -141,7 +158,8 @@ class HabitoRepository {
         }
       }
       streaks[h.id] = count;
-    }
+    });
+
     return streaks;
   }
 

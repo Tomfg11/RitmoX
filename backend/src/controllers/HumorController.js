@@ -11,13 +11,21 @@ class HumorController {
         return res.status(400).json({ erro: 'Nível de humor inválido (deve ser entre 1 e 5)' });
       }
 
+      const jaTinhaRegistro = await HumorRepository.getHumorHoje(usuarioId);
       const humor = await HumorRepository.registrar(usuarioId, nivel, notas);
       
-      // Bônus de XP por registrar o humor (incentivo)
-      await UsuarioRepository.adicionarXP(usuarioId, 10);
-      const usuario = await UsuarioRepository.findById(usuarioId);
+      let xp_total;
+      if (!jaTinhaRegistro) {
+        // Bônus de XP apenas no primeiro registro do dia
+        await UsuarioRepository.adicionarXP(usuarioId, 10);
+        const usuario = await UsuarioRepository.findById(usuarioId);
+        xp_total = usuario.xp_acumulado;
+      } else {
+        const usuario = await UsuarioRepository.findById(usuarioId);
+        xp_total = usuario.xp_acumulado;
+      }
 
-      res.status(201).json({ humor, xp_total: usuario.xp_acumulado });
+      res.status(201).json({ humor, xp_total, ganhou_xp: !jaTinhaRegistro });
     } catch (erro) {
       res.status(500).json({ erro: 'Erro ao registrar humor' });
     }

@@ -23,12 +23,9 @@ export default function Layout({ children }) {
     { icon: Calendar, label: 'Planejador', path: '/planner' },
     { icon: Flame, label: 'Hábitos', path: '/habitos' },
     { icon: BarChart3, label: 'Estatísticas', path: '/analytics' },
-    { icon: Settings, label: 'Ajustes', path: '/settings' },
+    { icon: Settings, label: 'Configurações', path: '/settings' },
   ];
 
-  if (isAdmin) {
-    navItems.push({ icon: ShieldCheck, label: 'Aprovações', path: '/admin' });
-  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 flex flex-col md:flex-row">

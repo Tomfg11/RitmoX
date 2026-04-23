@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { UserCheck, UserX, Clock, Search, ShieldAlert } from 'lucide-react';
 
-export default function Admin() {
+export default function Admin({ hideHeader = false }) {
   const [pendentes, setPendentes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState('');
@@ -50,23 +50,40 @@ export default function Admin() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-black text-white tracking-tight">Aprovações Pendentes</h2>
-          <p className="text-slate-400 mt-1 font-medium">Gerencie o acesso de novos usuários à plataforma.</p>
+      {!hideHeader && (
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-3xl font-black text-white tracking-tight">Aprovações Pendentes</h2>
+            <p className="text-slate-400 mt-1 font-medium">Gerencie o acesso de novos usuários à plataforma.</p>
+          </div>
+          
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5 group-focus-within:text-brand-primary transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Filtrar por nome ou e-mail..." 
+              className="bg-slate-900/50 border border-slate-800 rounded-2xl py-3 pl-12 pr-6 text-sm w-full md:w-80 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 transition-all"
+              value={filtro}
+              onChange={e => setFiltro(e.target.value)}
+            />
+          </div>
         </div>
-        
-        <div className="relative group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5 group-focus-within:text-brand-primary transition-colors" />
-          <input 
-            type="text" 
-            placeholder="Filtrar por nome ou e-mail..." 
-            className="bg-slate-900/50 border border-slate-800 rounded-2xl py-3 pl-12 pr-6 text-sm w-full md:w-80 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 transition-all"
-            value={filtro}
-            onChange={e => setFiltro(e.target.value)}
-          />
-        </div>
-      </div>
+      )}
+
+      {hideHeader && (
+         <div className="flex justify-end mb-4">
+            <div className="relative group w-full md:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5 group-focus-within:text-brand-primary transition-colors" />
+              <input 
+                type="text" 
+                placeholder="Filtrar por nome ou e-mail..." 
+                className="bg-slate-900/50 border border-slate-800 rounded-2xl py-3 pl-12 pr-6 text-sm w-full focus:outline-none focus:ring-2 focus:ring-brand-primary/50 transition-all"
+                value={filtro}
+                onChange={e => setFiltro(e.target.value)}
+              />
+            </div>
+         </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center h-64">

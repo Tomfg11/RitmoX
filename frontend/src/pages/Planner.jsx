@@ -90,35 +90,66 @@ export default function Planner() {
         </button>
       </header>
 
-      {/* Week Navigation */}
-      <div className="glass-card rounded-[2.5rem] p-4 flex items-center justify-between">
-        <button 
-            onClick={() => {
-                const d = new Date(dataSelecionada);
-                d.setDate(d.getDate() - 7);
-                setDataSelecionada(d);
-            }}
-            className="p-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all"
-        >
-            <ChevronLeft />
-        </button>
-        <h2 className="font-bold text-white uppercase tracking-widest text-sm">
-            {weekDays[0].toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-        </h2>
-        <button 
-            onClick={() => {
-                const d = new Date(dataSelecionada);
-                d.setDate(d.getDate() + 7);
-                setDataSelecionada(d);
-            }}
-            className="p-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all"
-        >
-            <ChevronRight />
-        </button>
+      {/* Week Navigation & Mobile Day Strip */}
+      <div className="space-y-4">
+        <div className="glass-card rounded-[2.5rem] p-4 flex items-center justify-between">
+          <button 
+              onClick={() => {
+                  const d = new Date(dataSelecionada);
+                  d.setDate(d.getDate() - 7);
+                  setDataSelecionada(d);
+              }}
+              className="p-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all"
+          >
+              <ChevronLeft />
+          </button>
+          <h2 className="font-bold text-white uppercase tracking-widest text-sm">
+              {weekDays[0].toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+          </h2>
+          <button 
+              onClick={() => {
+                  const d = new Date(dataSelecionada);
+                  d.setDate(d.getDate() + 7);
+                  setDataSelecionada(d);
+              }}
+              className="p-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all"
+          >
+              <ChevronRight />
+          </button>
+        </div>
+
+        {/* Mobile Day Strip - Quick Jump */}
+        <div className="flex md:hidden justify-between gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {weekDays.map((day, idx) => {
+            const dateStr = day.toISOString().split('T')[0];
+            const hasTarefas = tarefas.some(t => {
+                const dataTarefa = typeof t.data === 'string' ? t.data : new Date(t.data).toISOString();
+                return dataTarefa.split('T')[0] === dateStr;
+            });
+            const isToday = new Date().toISOString().split('T')[0] === dateStr;
+            
+            return (
+              <button 
+                key={idx}
+                onClick={() => {
+                  const element = document.getElementById(`day-col-${idx}`);
+                  element?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+                }}
+                className={`flex-1 min-w-[45px] py-3 rounded-2xl border flex flex-col items-center gap-1 transition-all ${
+                  isToday ? 'bg-brand-primary/20 border-brand-primary text-white shadow-lg shadow-brand-primary/10' : 'bg-slate-900/50 border-slate-800 text-slate-500'
+                }`}
+              >
+                <span className="text-[10px] font-black uppercase">{diasDaSemana[idx][0]}</span>
+                <span className="text-sm font-black">{day.getDate()}</span>
+                {hasTarefas && <div className="w-1 h-1 rounded-full bg-brand-secondary animate-pulse" />}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Weekly View Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+      {/* Weekly View - Responsive Grid/Scroll */}
+      <div className="flex md:grid md:grid-cols-7 gap-4 overflow-x-auto md:overflow-visible pb-6 md:pb-0 scrollbar-hide snap-x">
         {weekDays.map((day, idx) => {
           const dateStr = day.toISOString().split('T')[0];
           const tarefasDoDia = tarefas.filter(t => {
@@ -128,7 +159,11 @@ export default function Planner() {
           const isToday = new Date().toISOString().split('T')[0] === dateStr;
 
           return (
-            <div key={idx} className={`flex flex-col gap-4 min-h-[200px] ${isToday ? 'md:scale-105 z-10' : ''}`}>
+            <div 
+              key={idx} 
+              id={`day-col-${idx}`}
+              className={`flex-shrink-0 w-[85vw] md:w-auto snap-center flex flex-col gap-4 min-h-[300px] md:min-h-[200px] ${isToday ? 'md:scale-105 z-10' : ''}`}
+            >
               <div className={`text-center p-3 rounded-2xl border ${isToday ? 'bg-brand-primary/10 border-brand-primary text-brand-primary shadow-lg shadow-brand-primary/10' : 'bg-slate-900 border-slate-800 text-slate-500'}`}>
                 <p className="text-[10px] font-black uppercase tracking-tighter">{diasDaSemana[idx]}</p>
                 <p className="text-lg font-black">{day.getDate()}</p>
@@ -138,30 +173,30 @@ export default function Planner() {
                 {tarefasDoDia.map(tarefa => (
                   <div 
                     key={tarefa.id} 
-                    className={`glass-card p-4 rounded-2xl border-l-4 group relative ${tarefa.concluida ? 'opacity-50' : ''} ${
+                    className={`glass-card p-3 md:p-4 rounded-2xl border-l-4 group relative transition-all hover:translate-x-1 ${tarefa.concluida ? 'opacity-50' : ''} ${
                       tarefa.prioridade === 'alta' ? 'border-l-red-500' : 
                       tarefa.prioridade === 'baixa' ? 'border-l-slate-600' : 'border-l-brand-secondary'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <button onClick={() => handleToggleTarefa(tarefa.id)}>
+                      <button onClick={() => handleToggleTarefa(tarefa.id)} className="shrink-0">
                         {tarefa.concluida ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <Circle className="w-5 h-5 text-slate-600" />}
                       </button>
                       <button 
                         onClick={() => handleDeleteTarefa(tarefa.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-slate-600 hover:text-red-500 transition-all"
+                        className="md:opacity-0 group-hover:opacity-100 p-1 text-slate-600 hover:text-red-500 transition-all"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                    <p className={`text-xs font-bold text-slate-100 leading-tight ${tarefa.concluida ? 'line-through text-slate-500' : ''}`}>
+                    <p className={`text-xs md:text-sm font-bold text-slate-100 leading-tight ${tarefa.concluida ? 'line-through text-slate-500' : ''}`}>
                       {tarefa.titulo}
                     </p>
                     {tarefa.descricao && <p className="text-[10px] text-slate-500 mt-2 line-clamp-2">{tarefa.descricao}</p>}
                   </div>
                 ))}
                 {tarefasDoDia.length === 0 && (
-                    <div className="h-full border-2 border-dashed border-slate-900 rounded-2xl flex items-center justify-center opacity-20">
+                    <div className="flex-1 border-2 border-dashed border-slate-900 rounded-2xl flex items-center justify-center opacity-20 min-h-[100px]">
                         <Plus className="w-4 h-4" />
                     </div>
                 )}
