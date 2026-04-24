@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useNotify } from '../contexts/NotificationContext';
 
 export default function HabitoModal({ isOpen, onClose, onSave, initialData = null }) {
+  const { notify } = useNotify();
   const [titulo, setTitulo] = useState('');
   const [xp, setXp] = useState(10);
   const [diasSelecionados, setDiasSelecionados] = useState([]);
@@ -87,7 +89,13 @@ export default function HabitoModal({ isOpen, onClose, onSave, initialData = nul
             </div>
           </div>
           <button 
-            onClick={() => onSave({ titulo, xp_recompensa: xp, dias_semana: diasSelecionados.join(',') })}
+            onClick={() => {
+              if (!titulo.trim()) {
+                notify('Nome Inválido', 'Por favor, dê um nome ao seu hábito.', 'error');
+                return;
+              }
+              onSave({ titulo, xp_recompensa: xp, dias_semana: diasSelecionados.join(',') });
+            }}
             className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-brand-primary/20 active:scale-[0.98] mt-4"
           >
             {initialData ? 'ATUALIZAR HÁBITO' : 'SALVAR HÁBITO'}

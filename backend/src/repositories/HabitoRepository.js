@@ -112,7 +112,7 @@ class HabitoRepository {
   }
 
   async getStreaks(usuarioId) {
-    const habitos = await pool.query('SELECT id FROM habitos WHERE usuario_id = $1', [usuarioId]);
+    const habitos = await pool.query('SELECT id, dias_semana FROM habitos WHERE usuario_id = $1', [usuarioId]);
     if (habitos.rows.length === 0) return {};
 
     const ids = habitos.rows.map(h => h.id);
@@ -132,7 +132,13 @@ class HabitoRepository {
         registrosPorHabito[reg.habito_id] = [];
       }
       
-      const dataStr = new Date(reg.data).toISOString().split('T')[0];
+      const d = new Date(reg.data);
+      // Extrair YYYY-MM-DD usando métodos locais para evitar problemas de fuso
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const dataStr = `${year}-${month}-${day}`;
+      
       if (!registrosPorHabito[reg.habito_id].includes(dataStr)) {
         registrosPorHabito[reg.habito_id].push(dataStr);
       }
@@ -140,23 +146,40 @@ class HabitoRepository {
 
     habitos.rows.forEach(h => {
       const habitoRegistros = registrosPorHabito[h.id] || [];
-      let count = 0;
-      let targetDate = new Date();
-      targetDate.setHours(0,0,0,0);
       
-      for (const regDateStr of habitoRegistros) {
-        const regDate = new Date(regDateStr);
-        regDate.setHours(0,0,0,0);
+      const regTimestamps = habitoRegistros.map(dateStr => {
+        const [year, month, day] = dateStr.split('-');
+        const d = new Date(year, month - 1, day);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+      });
+
+      let count = 0;
+      let checkDate = new Date();
+      checkDate.setHours(0, 0, 0, 0);
+      
+      const diasSemanaArr = h.dias_semana ? h.dias_semana.split(',').map(Number) : [0, 1, 2, 3, 4, 5, 6];
+      let todayTimestamp = checkDate.getTime();
+      
+      const oldestCheckinTimestamp = regTimestamps.length > 0 ? Math.min(...regTimestamps) : todayTimestamp;
+      
+      while (checkDate.getTime() >= oldestCheckinTimestamp) {
+        let isCompleted = regTimestamps.includes(checkDate.getTime());
+        let isScheduled = diasSemanaArr.includes(checkDate.getDay());
+        let isToday = checkDate.getTime() === todayTimestamp;
         
-        const diff = Math.floor((targetDate - regDate) / (1000 * 60 * 60 * 24));
-        
-        if (diff === 0 || diff === 1) {
+        if (isCompleted) {
           count++;
-          targetDate = regDate;
         } else {
-          break;
+          if (isScheduled && !isToday) {
+            break; // Missed a scheduled day in the past -> Streak breaks
+          }
         }
+        
+        checkDate.setDate(checkDate.getDate() - 1);
+        checkDate.setHours(0, 0, 0, 0);
       }
+      
       streaks[h.id] = count;
     });
 

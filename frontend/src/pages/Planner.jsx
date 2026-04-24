@@ -31,8 +31,11 @@ export default function Planner() {
 
   async function handleAddTarefa(dados) {
     try {
-      const response = await api.post('/tarefas', dados);
-      setTarefas([...tarefas, response.data]);
+      const { datas, ...rest } = dados;
+      const promises = datas.map(data => api.post('/tarefas', { ...rest, data }));
+      const responses = await Promise.all(promises);
+      const novasTarefas = responses.map(res => res.data);
+      setTarefas([...tarefas, ...novasTarefas]);
       setIsModalOpen(false);
     } catch (error) {
       const msg = error.response?.data?.detalhe || "Erro desconhecido";

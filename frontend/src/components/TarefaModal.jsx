@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { X, Calendar as CalendarIcon, Flag } from 'lucide-react';
+import { useNotify } from '../contexts/NotificationContext';
 
 export default function TarefaModal({ isOpen, onClose, onSave }) {
+  const { notify } = useNotify();
   const [titulo, setTitulo] = useState('');
-  const [data, setData] = useState(new Date().toISOString().split('T')[0]);
+  const [datas, setDatas] = useState([new Date().toISOString().split('T')[0]]);
   const [prioridade, setPrioridade] = useState('normal');
   const [descricao, setDescricao] = useState('');
 
@@ -28,16 +30,47 @@ export default function TarefaModal({ isOpen, onClose, onSave }) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Data</label>
-                <div className="relative">
-                    <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input 
-                    type="date"
-                    className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl pl-10 pr-4 py-4 text-white text-xs focus:ring-2 focus:ring-brand-primary/50 outline-none transition-all"
-                    value={data} onChange={e => setData(e.target.value)}
-                    />
+            <div className="space-y-2 flex-1">
+                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Data(s)</label>
+                <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1 scrollbar-hide">
+                    {datas.map((data, index) => (
+                        <div key={index} className="flex gap-2">
+                            <div className="relative flex-1">
+                                <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                <input 
+                                    type="date"
+                                    className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl pl-10 pr-4 py-4 text-white text-xs focus:ring-2 focus:ring-brand-primary/50 outline-none transition-all"
+                                    value={data} 
+                                    onChange={e => {
+                                        const novasDatas = [...datas];
+                                        novasDatas[index] = e.target.value;
+                                        setDatas(novasDatas);
+                                    }}
+                                />
+                            </div>
+                            {datas.length > 1 && (
+                                <button 
+                                    onClick={() => {
+                                        const novasDatas = datas.filter((_, i) => i !== index);
+                                        setDatas(novasDatas);
+                                    }}
+                                    className="px-4 text-slate-500 hover:text-red-500 bg-slate-900/50 border border-slate-800 rounded-2xl transition-all"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
+                    ))}
                 </div>
+                <button
+                    onClick={() => {
+                        const lastDate = datas[datas.length - 1];
+                        setDatas([...datas, lastDate]);
+                    }}
+                    className="text-[10px] uppercase font-black tracking-widest text-brand-primary hover:text-brand-secondary transition-all ml-1 mt-1"
+                >
+                    + Adicionar outro dia
+                </button>
             </div>
             <div className="space-y-2">
                 <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Prioridade</label>
@@ -65,7 +98,13 @@ export default function TarefaModal({ isOpen, onClose, onSave }) {
           </div>
 
           <button 
-            onClick={() => onSave({ titulo, data, prioridade, descricao })}
+            onClick={() => {
+              if (!titulo.trim()) {
+                notify('Nome Inválido', 'Por favor, dê um nome ao seu compromisso.', 'error');
+                return;
+              }
+              onSave({ titulo, datas, prioridade, descricao });
+            }}
             className="w-full bg-brand-secondary hover:bg-brand-secondary/90 text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-brand-secondary/20 active:scale-[0.98] mt-4"
           >
             ADICIONAR AO PLANNER

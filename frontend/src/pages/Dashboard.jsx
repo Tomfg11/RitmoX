@@ -12,7 +12,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import HabitoModal from '../components/HabitoModal'; 
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { useNotify } from '../contexts/NotificationContext';
 
@@ -28,6 +28,17 @@ export default function Dashboard() {
   const [habitoSelecionado, setHabitoSelecionado] = useState(null);
 
   const [longLoad, setLongLoad] = useState(false);
+  
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.openModal) {
+      setIsModalOpen(true);
+      // Limpa o state para não reabrir ao dar refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   useEffect(() => {
     loadInitialData();
@@ -328,7 +339,7 @@ export default function Dashboard() {
                       {new Date(tarefa.data).toLocaleDateString('pt-BR', { 
                         day: '2-digit', 
                         month: 'long',
-                        timeZone: 'UTC' // Importante para evitar problemas de fuso horário com datas puras
+                        timeZone: 'America/Sao_Paulo'
                       })}
                     </span>
                   </div>

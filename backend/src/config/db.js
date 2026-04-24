@@ -11,4 +11,8 @@ const pool = new Pool({
   ssl: (process.env.DATABASE_URL || process.env.DB_HOST !== 'localhost') ? { rejectUnauthorized: false } : false
 });
 
-module.exports = pool; 
+pool.on('connect', client => {
+  client.query("SET timezone = 'America/Sao_Paulo'");
+});
+
+module.exports = pool;
