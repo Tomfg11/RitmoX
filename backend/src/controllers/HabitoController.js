@@ -28,9 +28,10 @@ class HabitoController {
 
         await HabitoRepository.realizarCheckin(req.params.id, req.body.notas_de_reflexao);
         
+        const xp = habito.xp_recompensa || 10;
         const userUpdate = await pool.query(
             'UPDATE usuarios SET xp_acumulado = xp_acumulado + $1 WHERE id = $2 RETURNING xp_acumulado',
-            [habito.xp_recompensa, req.usuarioId]
+            [xp, req.usuarioId]
         );
 
         res.status(201).json({ mensagem: 'Check-in realizado!', xp_total: userUpdate.rows[0].xp_acumulado });

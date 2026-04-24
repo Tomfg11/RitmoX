@@ -39,10 +39,20 @@ class HabitoRepository {
   }
 
   async realizarCheckin(habitoId, notas) {
-    return await pool.query(
-      'INSERT INTO registros_habitos (habito_id, notas_de_reflexao) VALUES ($1, $2)',
-      [habitoId, notas]
-    );
+    try {
+      return await pool.query(
+        'INSERT INTO registros_habitos (habito_id, notas_de_reflexao) VALUES ($1, $2)',
+        [habitoId, notas]
+      );
+    } catch (e) {
+      if (e.code === '42703') { 
+        return await pool.query(
+          'INSERT INTO registros_habitos (habito_id) VALUES ($1)',
+          [habitoId]
+        );
+      }
+      throw e;
+    }
   }
 
   async getDashboardData(usuarioId) {
