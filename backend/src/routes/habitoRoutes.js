@@ -2,21 +2,25 @@ const express = require('express');
 const router = express.Router();
 const HabitoController = require('../controllers/HabitoController');
 const { verificarToken } = require('../middlewares/authMiddleware');
+const pool = require('../config/db');
 
 router.use(verificarToken); // Protege todas as rotas abaixo
+
+// ATENÇÃO: rotas estáticas SEMPRE antes das dinâmicas com /:id
+router.get('/dashboard', HabitoController.dashboard);
 
 router.get('/', HabitoController.listar);
 router.post('/', HabitoController.criar);
 router.post('/:id/checkin', HabitoController.checkin);
 router.put('/:id', HabitoController.editar);
-router.get('/dashboard', HabitoController.dashboard);
 router.delete('/:id', HabitoController.excluir);
+
 // Rota para salvar a reflexão/resumo de um hábito específico
 router.post('/:id/resumo', async (req, res) => {
   try {
     const { id } = req.params;
     const { conteudo } = req.body;
-    const usuarioId = req.usuarioId; // Pego pelo middleware de auth
+    const usuarioId = req.usuarioId;
 
     const novoResumo = await pool.query(
       'INSERT INTO resumos_semanais (habito_id, usuario_id, conteudo) VALUES ($1, $2, $3) RETURNING *',
@@ -25,8 +29,8 @@ router.post('/:id/resumo', async (req, res) => {
 
     res.status(201).json(novoResumo.rows[0]);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao salvar resumo' });
+    res.status(500).json({ erro: 'Erro ao salvar resumo', detalhe: erro.message });
   }
 });
 
-module.exports = router;
+module.exports = router;
