@@ -38,14 +38,15 @@ class HabitoRepository {
     return result.rows[0];
   }
 
-  async realizarCheckin(habitoId, notas) {
+  async realizarCheckin(habitoId, usuarioId, notas) {
     try {
       return await pool.query(
-        'INSERT INTO registros_habitos (habito_id, notas_de_reflexao) VALUES ($1, $2)',
-        [habitoId, notas]
+        'INSERT INTO registros_habitos (habito_id, usuario_id, notas_de_reflexao) VALUES ($1, $2, $3)',
+        [habitoId, usuarioId, notas]
       );
     } catch (e) {
       if (e.code === '42703') { 
+        // fallback caso a coluna usuario_id ou notas_de_reflexao não existam
         return await pool.query(
           'INSERT INTO registros_habitos (habito_id) VALUES ($1)',
           [habitoId]

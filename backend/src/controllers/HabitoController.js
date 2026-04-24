@@ -23,10 +23,13 @@ class HabitoController {
 
     async checkin(req, res) {
         try {
-        const habito = await HabitoRepository.findByIdAndUser(req.params.id, req.usuarioId);
+        const habitoId = parseInt(req.params.id, 10);
+        if (isNaN(habitoId)) return res.status(400).json({ erro: 'ID de hábito inválido' });
+
+        const habito = await HabitoRepository.findByIdAndUser(habitoId, req.usuarioId);
         if (!habito) return res.status(404).json({ erro: 'Hábito não encontrado' });
 
-        await HabitoRepository.realizarCheckin(req.params.id, req.body.notas_de_reflexao);
+        await HabitoRepository.realizarCheckin(habito.id, req.usuarioId, req.body.notas_de_reflexao);
         
         const xp = parseInt(habito.xp_recompensa, 10) || 10;
         const userUpdate = await pool.query(
@@ -38,7 +41,7 @@ class HabitoController {
         res.status(201).json({ mensagem: 'Check-in realizado!', xp_total: xpTotal });
         } catch (e) {
         if (e.code === '23505') return res.status(400).json({ erro: 'Check-in já realizado hoje' });
-        res.status(500).json({ erro: 'Erro no check-in', detalhe: e.message, code: e.code });
+        res.status(500).json({ erro: 'Erro no check-in', detalhe: e.message, code: e.code, habito_id_tentado: req.params.id, usuario_id: req.usuarioId });
         }
     }
 
