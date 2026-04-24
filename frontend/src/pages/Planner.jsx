@@ -93,7 +93,7 @@ export default function Planner() {
         </button>
       </header>
 
-      {/* Week Navigation & Mobile Day Strip */}
+      {/* Week Navigation */}
       <div className="space-y-4">
         <div className="glass-card rounded-[2.5rem] p-4 flex items-center justify-between">
           <button 
@@ -106,9 +106,12 @@ export default function Planner() {
           >
               <ChevronLeft />
           </button>
-          <h2 className="font-bold text-white uppercase tracking-widest text-sm">
-              {weekDays[0].toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-          </h2>
+          <div className="text-center flex flex-col items-center">
+            <h2 className="font-bold text-white uppercase tracking-widest text-sm">
+                {weekDays[0].toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+            </h2>
+            <p className="text-[10px] text-brand-primary md:hidden mt-1 font-medium uppercase tracking-wider">Deslize para ver os dias</p>
+          </div>
           <button 
               onClick={() => {
                   const d = new Date(dataSelecionada);
@@ -122,37 +125,41 @@ export default function Planner() {
         </div>
 
         {/* Mobile Day Strip - Quick Jump */}
-        <div className="flex md:hidden justify-between gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {weekDays.map((day, idx) => {
-            const dateStr = day.toISOString().split('T')[0];
-            const hasTarefas = tarefas.some(t => {
-                const dataTarefa = typeof t.data === 'string' ? t.data : new Date(t.data).toISOString();
-                return dataTarefa.split('T')[0] === dateStr;
-            });
-            const isToday = new Date().toISOString().split('T')[0] === dateStr;
-            
-            return (
-              <button 
-                key={idx}
-                onClick={() => {
-                  const element = document.getElementById(`day-col-${idx}`);
-                  element?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-                }}
-                className={`flex-1 min-w-[45px] py-3 rounded-2xl border flex flex-col items-center gap-1 transition-all ${
-                  isToday ? 'bg-brand-primary/20 border-brand-primary text-white shadow-lg shadow-brand-primary/10' : 'bg-slate-900/50 border-slate-800 text-slate-500'
-                }`}
-              >
-                <span className="text-[10px] font-black uppercase">{diasDaSemana[idx][0]}</span>
-                <span className="text-sm font-black">{day.getDate()}</span>
-                {hasTarefas && <div className="w-1 h-1 rounded-full bg-brand-secondary animate-pulse" />}
-              </button>
-            );
-          })}
+        <div className="sticky top-[70px] z-20 bg-[#020617]/90 backdrop-blur-xl py-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex md:hidden justify-between gap-2 overflow-x-auto scrollbar-hide pb-2">
+            {weekDays.map((day, idx) => {
+              const dateStr = day.toISOString().split('T')[0];
+              const hasTarefas = tarefas.some(t => {
+                  const dataTarefa = typeof t.data === 'string' ? t.data : new Date(t.data).toISOString();
+                  return dataTarefa.split('T')[0] === dateStr;
+              });
+              const isToday = new Date().toISOString().split('T')[0] === dateStr;
+              
+              return (
+                <button 
+                  key={idx}
+                  onClick={() => {
+                    const element = document.getElementById(`day-col-${idx}`);
+                    const yOffset = -160; 
+                    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                  }}
+                  className={`flex-1 min-w-[48px] py-3 rounded-2xl border flex flex-col items-center gap-1.5 transition-all ${
+                    isToday ? 'bg-brand-primary text-white border-brand-primary shadow-lg shadow-brand-primary/20' : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <span className={`text-[10px] font-black uppercase ${isToday ? 'text-white' : 'text-slate-500'}`}>{diasDaSemana[idx][0]}</span>
+                  <span className="text-sm font-black">{day.getDate()}</span>
+                  <div className={`w-1.5 h-1.5 rounded-full ${hasTarefas ? (isToday ? 'bg-white' : 'bg-brand-secondary') : 'bg-transparent'}`} />
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Weekly View - Responsive Grid/Scroll */}
-      <div className="flex md:grid md:grid-cols-7 gap-4 overflow-x-auto md:overflow-visible pb-6 md:pb-0 scrollbar-hide snap-x">
+      {/* Weekly View - Responsive Timeline/Grid */}
+      <div className="flex flex-col md:grid md:grid-cols-7 gap-8 md:gap-4 mt-2 md:mt-6 pb-24 md:pb-0">
         {weekDays.map((day, idx) => {
           const dateStr = day.toISOString().split('T')[0];
           const tarefasDoDia = tarefas.filter(t => {
@@ -165,43 +172,76 @@ export default function Planner() {
             <div 
               key={idx} 
               id={`day-col-${idx}`}
-              className={`flex-shrink-0 w-[85vw] md:w-auto snap-center flex flex-col gap-4 min-h-[300px] md:min-h-[200px] ${isToday ? 'md:scale-105 z-10' : ''}`}
+              className={`flex flex-col gap-4 relative scroll-mt-[160px] md:scroll-mt-0 ${isToday ? 'md:scale-105 md:z-10' : ''}`}
             >
-              <div className={`text-center p-3 rounded-2xl border ${isToday ? 'bg-brand-primary/10 border-brand-primary text-brand-primary shadow-lg shadow-brand-primary/10' : 'bg-slate-900 border-slate-800 text-slate-500'}`}>
-                <p className="text-[10px] font-black uppercase tracking-tighter">{diasDaSemana[idx]}</p>
-                <p className="text-lg font-black">{day.getDate()}</p>
+              {/* Day Header */}
+              <div className="flex items-center gap-4 md:block">
+                <div className={`flex flex-col items-center justify-center w-14 h-14 md:w-auto md:h-auto md:p-3 shrink-0 rounded-2xl border transition-colors ${
+                  isToday 
+                    ? 'bg-brand-primary text-white shadow-xl shadow-brand-primary/30 border-brand-primary/50' 
+                    : 'bg-slate-900 border-slate-800 text-slate-400'
+                }`}>
+                  <p className={`text-[10px] font-black uppercase tracking-widest md:tracking-tighter ${isToday ? 'text-white' : 'text-slate-500'}`}>{diasDaSemana[idx]}</p>
+                  <p className="text-xl md:text-lg font-black leading-none mt-1 md:mt-0">{day.getDate()}</p>
+                </div>
+                
+                {/* Mobile Line Separator & Day Summary */}
+                <div className="md:hidden flex-1 flex items-center gap-3">
+                  <div className="h-[1px] rounded-full bg-slate-800 flex-1"></div>
+                  <span className={`text-[10px] font-bold uppercase tracking-widest ${tarefasDoDia.length > 0 ? 'text-brand-secondary' : 'text-slate-600'}`}>
+                    {tarefasDoDia.length === 0 ? 'Livre' : `${tarefasDoDia.length} ${tarefasDoDia.length === 1 ? 'item' : 'itens'}`}
+                  </span>
+                </div>
               </div>
 
-              <div className="flex-1 space-y-3">
+              {/* Tasks List */}
+              <div className="flex-1 flex flex-col gap-3 pl-6 border-l-2 border-slate-800/40 ml-7 md:pl-0 md:border-l-0 md:ml-0">
                 {tarefasDoDia.map(tarefa => (
                   <div 
                     key={tarefa.id} 
-                    className={`glass-card p-3 md:p-4 rounded-2xl border-l-4 group relative transition-all hover:translate-x-1 ${tarefa.concluida ? 'opacity-50' : ''} ${
-                      tarefa.prioridade === 'alta' ? 'border-l-red-500' : 
-                      tarefa.prioridade === 'baixa' ? 'border-l-slate-600' : 'border-l-brand-secondary'
+                    className={`glass-card p-3.5 md:p-4 rounded-2xl border-l-4 group relative transition-all hover:-translate-y-1 hover:shadow-lg ${
+                      tarefa.concluida ? 'opacity-50 grayscale' : ''
+                    } ${
+                      tarefa.prioridade === 'alta' ? 'border-l-red-500 shadow-red-500/10' : 
+                      tarefa.prioridade === 'baixa' ? 'border-l-slate-600' : 'border-l-brand-secondary shadow-brand-secondary/10'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <button onClick={() => handleToggleTarefa(tarefa.id)} className="shrink-0">
-                        {tarefa.concluida ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <Circle className="w-5 h-5 text-slate-600" />}
+                      <button onClick={() => handleToggleTarefa(tarefa.id)} className="shrink-0 transition-transform active:scale-90">
+                        {tarefa.concluida ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <Circle className="w-5 h-5 text-slate-500" />}
                       </button>
                       <button 
                         onClick={() => handleDeleteTarefa(tarefa.id)}
-                        className="md:opacity-0 group-hover:opacity-100 p-1 text-slate-600 hover:text-red-500 transition-all"
+                        className="opacity-100 md:opacity-0 group-hover:opacity-100 p-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                    <p className={`text-xs md:text-sm font-bold text-slate-100 leading-tight ${tarefa.concluida ? 'line-through text-slate-500' : ''}`}>
+                    <p className={`text-sm md:text-sm font-bold leading-tight ${tarefa.concluida ? 'line-through text-slate-500' : 'text-slate-100'}`}>
                       {tarefa.titulo}
                     </p>
-                    {tarefa.descricao && <p className="text-[10px] text-slate-500 mt-2 line-clamp-2">{tarefa.descricao}</p>}
+                    {tarefa.descricao && <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">{tarefa.descricao}</p>}
                   </div>
                 ))}
+                
+                {/* Empty State for the day (Desktop) */}
                 {tarefasDoDia.length === 0 && (
-                    <div className="flex-1 border-2 border-dashed border-slate-900 rounded-2xl flex items-center justify-center opacity-20 min-h-[100px]">
-                        <Plus className="w-4 h-4" />
-                    </div>
+                  <div 
+                    onClick={() => {
+                      setDataSelecionada(day);
+                      setIsModalOpen(true);
+                    }}
+                    className="hidden md:flex flex-1 border-2 border-dashed border-slate-800/50 rounded-2xl items-center justify-center opacity-30 min-h-[100px] hover:opacity-100 transition-all hover:border-brand-primary/50 hover:bg-brand-primary/5 cursor-pointer"
+                  >
+                      <Plus className="w-5 h-5 text-brand-primary" />
+                  </div>
+                )}
+                {/* Mobile empty state indicator */}
+                {tarefasDoDia.length === 0 && (
+                  <div className="md:hidden py-2.5 px-4 rounded-xl border border-dashed border-slate-800/50 bg-slate-900/30 text-slate-500 text-xs font-medium inline-flex items-center gap-2 w-fit">
+                    <CalendarIcon className="w-3.5 h-3.5 opacity-50" />
+                    Nenhum compromisso
+                  </div>
                 )}
               </div>
             </div>
