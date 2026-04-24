@@ -28,16 +28,17 @@ class HabitoController {
 
         await HabitoRepository.realizarCheckin(req.params.id, req.body.notas_de_reflexao);
         
-        const xp = habito.xp_recompensa || 10;
+        const xp = parseInt(habito.xp_recompensa, 10) || 10;
         const userUpdate = await pool.query(
-            'UPDATE usuarios SET xp_acumulado = xp_acumulado + $1 WHERE id = $2 RETURNING xp_acumulado',
+            'UPDATE usuarios SET xp_acumulado = COALESCE(xp_acumulado, 0) + $1 WHERE id = $2 RETURNING xp_acumulado',
             [xp, req.usuarioId]
         );
 
-        res.status(201).json({ mensagem: 'Check-in realizado!', xp_total: userUpdate.rows[0].xp_acumulado });
+        const xpTotal = userUpdate.rows.length > 0 ? userUpdate.rows[0].xp_acumulado : 0;
+        res.status(201).json({ mensagem: 'Check-in realizado!', xp_total: xpTotal });
         } catch (e) {
         if (e.code === '23505') return res.status(400).json({ erro: 'Check-in já realizado hoje' });
-        res.status(500).json({ erro: 'Erro no check-in' });
+        res.status(500).json({ erro: 'Erro no check-in', detalhe: e.message, code: e.code });
         }
     }
 
