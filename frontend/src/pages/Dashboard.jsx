@@ -27,9 +27,16 @@ export default function Dashboard() {
   const [resumoTexto, setResumoTexto] = useState('');
   const [habitoSelecionado, setHabitoSelecionado] = useState(null);
 
+  const [longLoad, setLongLoad] = useState(false);
+
   useEffect(() => {
     loadInitialData();
     
+    // Timer para mostrar mensagem se demorar a carregar (servidor acordando)
+    const timer = setTimeout(() => {
+      if (!data && !error) setLongLoad(true);
+    }, 3000);
+
     const alreadyGreeted = sessionStorage.getItem('@RitmoX:greeting_shown');
     
     if (!alreadyGreeted) {
@@ -40,6 +47,8 @@ export default function Dashboard() {
         sessionStorage.setItem('@RitmoX:greeting_shown', 'true');
       }, 1500);
     }
+
+    return () => clearTimeout(timer);
   }, []);
 
   async function loadInitialData() {
@@ -151,6 +160,11 @@ export default function Dashboard() {
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
       <div className="w-12 h-12 border-4 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin"></div>
       <p className="text-slate-400 font-medium animate-pulse">Sincronizando seu ritmo...</p>
+      {longLoad && (
+        <p className="text-xs text-slate-500 max-w-[200px] text-center animate-in fade-in duration-700">
+          O servidor está acordando para você. Isso pode levar alguns segundos no primeiro acesso do dia... 💤 🚀
+        </p>
+      )}
     </div>
   );
 

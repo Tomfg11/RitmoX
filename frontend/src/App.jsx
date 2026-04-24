@@ -61,6 +61,9 @@ function App() {
           <Route path="/habitos" element={<PrivateRoute><Layout><Habitos /></Layout></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Layout><Settings /></Layout></PrivateRoute>} />
           <Route path="/admin" element={<Navigate to="/settings" />} />
+          
+          {/* Rota para capturar qualquer URL não definida e redirecionar */}
+          <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
         </BrowserRouter>
       </NotificationProvider>
