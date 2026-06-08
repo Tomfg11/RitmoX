@@ -1,10 +1,10 @@
 const pool = require('../config/db');
 
 class TarefaRepository {
-  async create(usuarioId, titulo, data, prioridade = 'normal', descricao = '') {
+  async create(usuarioId, titulo, data, prioridade = 'normal', descricao = '', tipo = 'EVENTO', data_limite = null) {
     const result = await pool.query(
-      'INSERT INTO tarefas (usuario_id, titulo, "data", prioridade, descricao) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [usuarioId, titulo, data, prioridade, descricao]
+      'INSERT INTO tarefas (usuario_id, titulo, "data", prioridade, descricao, tipo, data_limite) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [usuarioId, titulo, data, prioridade, descricao, tipo, data_limite]
     );
     return result.rows[0];
   }

@@ -8,6 +8,7 @@ const habitoRoutes = require('./routes/habitoRoutes');
 const tarefaRoutes = require('./routes/tarefaRoutes');
 const humorRoutes = require('./routes/humorRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/habitos', habitoRoutes);
 app.use('/tarefas', tarefaRoutes);
 app.use('/humor', humorRoutes);
 app.use('/admin', adminRoutes);
+app.use('/notifications', notificationRoutes);
 
 // Middleware de tratamento de erros global
 app.use((err, req, res, next) => {

@@ -19,6 +19,10 @@ export default function Habitos() {
 
   useEffect(() => {
     loadHabitos();
+
+    const handleUpdate = () => loadHabitos();
+    window.addEventListener('ritmox-update-habitos', handleUpdate);
+    return () => window.removeEventListener('ritmox-update-habitos', handleUpdate);
   }, []);
 
   async function loadHabitos() {
@@ -119,7 +123,7 @@ export default function Habitos() {
                  ) : (
                    <>
                      <Plus className="w-4 h-4" />
-                     CONCLUIR HOJE
+                     {(habito.meta_diaria || 1) > 1 ? `CHECK-IN (${habito.progresso_hoje || 0}/${habito.meta_diaria})` : 'CONCLUIR HOJE'}
                    </>
                  )}
                </button>

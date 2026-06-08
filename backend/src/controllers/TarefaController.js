@@ -4,14 +4,14 @@ const UsuarioRepository = require('../repositories/UsuarioRepository');
 class TarefaController {
   async criar(req, res) {
     try {
-      const { titulo, data, prioridade, descricao } = req.body;
+      const { titulo, data, prioridade, descricao, tipo, data_limite } = req.body;
       const usuarioId = req.usuarioId;
 
       if (!titulo || !data) {
         return res.status(400).json({ erro: 'Título e data são obrigatórios' });
       }
 
-      const tarefa = await TarefaRepository.create(usuarioId, titulo, data, prioridade, descricao);
+      const tarefa = await TarefaRepository.create(usuarioId, titulo, data, prioridade, descricao, tipo, data_limite);
       res.status(201).json(tarefa);
     } catch (erro) {
       console.error("ERRO NO CONTROLLER:", erro);

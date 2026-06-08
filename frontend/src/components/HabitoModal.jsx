@@ -7,6 +7,7 @@ export default function HabitoModal({ isOpen, onClose, onSave, initialData = nul
   const [titulo, setTitulo] = useState('');
   const [xp, setXp] = useState(10);
   const [diasSelecionados, setDiasSelecionados] = useState([]);
+  const [metaDiaria, setMetaDiaria] = useState(1);
 
   const diasDaSemana = [
     { id: '0', label: 'D' },
@@ -24,10 +25,12 @@ export default function HabitoModal({ isOpen, onClose, onSave, initialData = nul
       setTitulo(initialData.titulo);
       setXp(initialData.xp_recompensa);
       setDiasSelecionados(initialData.dias_semana ? initialData.dias_semana.split(',') : []);
+      setMetaDiaria(initialData.meta_diaria || 1);
     } else {
       setTitulo('');
       setXp(10);
       setDiasSelecionados([]);
+      setMetaDiaria(1);
     }
   }, [initialData, isOpen]);
 
@@ -77,15 +80,29 @@ export default function HabitoModal({ isOpen, onClose, onSave, initialData = nul
             <p className="text-[10px] text-slate-600 mt-1 ml-1">Se nenhum for selecionado, será diário.</p>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Recompensa (XP)</label>
-            <div className="relative">
-              <input 
-                type="number"
-                className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-brand-primary/50 outline-none transition-all"
-                value={xp} onChange={e => setXp(e.target.value)}
-              />
-              <span className="absolute right-5 top-1/2 -translate-y-1/2 font-black text-brand-primary text-xs tracking-widest">XP</span>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Meta Diária</label>
+              <div className="relative">
+                <input 
+                  type="number" min="1"
+                  className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-brand-primary/50 outline-none transition-all"
+                  value={metaDiaria} onChange={e => setMetaDiaria(parseInt(e.target.value) || 1)}
+                />
+                <span className="absolute right-5 top-1/2 -translate-y-1/2 font-black text-brand-primary text-xs tracking-widest">VEZES</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Recompensa</label>
+              <div className="relative">
+                <input 
+                  type="number"
+                  className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-brand-primary/50 outline-none transition-all"
+                  value={xp} onChange={e => setXp(e.target.value)}
+                />
+                <span className="absolute right-5 top-1/2 -translate-y-1/2 font-black text-brand-primary text-xs tracking-widest">XP</span>
+              </div>
             </div>
           </div>
           <button 
@@ -94,7 +111,7 @@ export default function HabitoModal({ isOpen, onClose, onSave, initialData = nul
                 notify('Nome Inválido', 'Por favor, dê um nome ao seu hábito.', 'error');
                 return;
               }
-              onSave({ titulo, xp_recompensa: xp, dias_semana: diasSelecionados.join(',') });
+              onSave({ titulo, xp_recompensa: xp, dias_semana: diasSelecionados.join(','), meta_diaria: metaDiaria });
             }}
             className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-brand-primary/20 active:scale-[0.98] mt-4"
           >

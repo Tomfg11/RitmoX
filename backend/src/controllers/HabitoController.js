@@ -13,8 +13,8 @@ class HabitoController {
 
     async criar(req, res) {
         try {
-        const { titulo, frequencia, xp_recompensa, dias_semana } = req.body;
-        const habito = await HabitoRepository.create(req.usuarioId, titulo, frequencia || 'personalizado', xp_recompensa, dias_semana);
+        const { titulo, frequencia, xp_recompensa, dias_semana, meta_diaria } = req.body;
+        const habito = await HabitoRepository.create(req.usuarioId, titulo, frequencia || 'personalizado', xp_recompensa, dias_semana, meta_diaria || 1);
         res.status(201).json(habito);
         } catch (e) {
         res.status(500).json({ erro: 'Erro ao criar hábito' });
@@ -40,7 +40,6 @@ class HabitoController {
         const xpTotal = userUpdate.rows.length > 0 ? userUpdate.rows[0].xp_acumulado : 0;
         res.status(201).json({ mensagem: 'Check-in realizado!', xp_total: xpTotal });
         } catch (e) {
-        if (e.code === '23505') return res.status(400).json({ erro: 'Check-in já realizado hoje' });
         res.status(500).json({ erro: 'Erro no check-in', detalhe: e.message, code: e.code, habito_id_tentado: req.params.id, usuario_id: req.usuarioId });
         }
     }
@@ -66,7 +65,8 @@ class HabitoController {
                 titulo: req.body.titulo || habitoAtual.titulo,
                 frequencia: req.body.frequencia || habitoAtual.frequencia,
                 xp_recompensa: req.body.xp_recompensa || habitoAtual.xp_recompensa,
-                dias_semana: req.body.dias_semana !== undefined ? req.body.dias_semana : habitoAtual.dias_semana
+                dias_semana: req.body.dias_semana !== undefined ? req.body.dias_semana : habitoAtual.dias_semana,
+                meta_diaria: req.body.meta_diaria !== undefined ? req.body.meta_diaria : habitoAtual.meta_diaria
             };
 
             const habito = await HabitoRepository.update(id, usuarioId, dadosUpdate);

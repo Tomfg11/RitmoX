@@ -5,10 +5,8 @@ class HabitoRepository {
     const habitos = await pool.query(
       `SELECT h.*, 
        COUNT(rh.id) as total_checkins,
-       EXISTS (
-         SELECT 1 FROM registros_habitos 
-         WHERE habito_id = h.id AND data_registro::DATE = CURRENT_DATE
-       ) as concluido_hoje
+       (SELECT COUNT(rh2.id) FROM registros_habitos rh2 WHERE rh2.habito_id = h.id AND rh2.data_registro::DATE = CURRENT_DATE) >= COALESCE(h.meta_diaria, 1) as concluido_hoje,
+       (SELECT COUNT(rh2.id) FROM registros_habitos rh2 WHERE rh2.habito_id = h.id AND rh2.data_registro::DATE = CURRENT_DATE) as progresso_hoje
        FROM habitos h
        LEFT JOIN registros_habitos rh ON h.id = rh.habito_id
        WHERE h.usuario_id = $1
@@ -22,10 +20,10 @@ class HabitoRepository {
     }));
   }
 
-  async create(usuarioId, titulo, frequencia, xp, diasSemana = null) {
+  async create(usuarioId, titulo, frequencia, xp, diasSemana = null, metaDiaria = 1) {
     const result = await pool.query(
-      'INSERT INTO habitos (usuario_id, titulo, frequencia, xp_recompensa, dias_semana) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [usuarioId, titulo, frequencia, xp, diasSemana]
+      'INSERT INTO habitos (usuario_id, titulo, frequencia, xp_recompensa, dias_semana, meta_diaria) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [usuarioId, titulo, frequencia, xp, diasSemana, metaDiaria]
     );
     return result.rows[0];
   }
@@ -62,10 +60,8 @@ class HabitoRepository {
     const habitos = await pool.query(
       `SELECT h.*, 
        COUNT(rh.id) as total_checkins,
-       EXISTS (
-         SELECT 1 FROM registros_habitos 
-         WHERE habito_id = h.id AND data_registro::DATE = CURRENT_DATE
-       ) as concluido_hoje
+       (SELECT COUNT(rh2.id) FROM registros_habitos rh2 WHERE rh2.habito_id = h.id AND rh2.data_registro::DATE = CURRENT_DATE) >= COALESCE(h.meta_diaria, 1) as concluido_hoje,
+       (SELECT COUNT(rh2.id) FROM registros_habitos rh2 WHERE rh2.habito_id = h.id AND rh2.data_registro::DATE = CURRENT_DATE) as progresso_hoje
        FROM habitos h
        LEFT JOIN registros_habitos rh ON h.id = rh.habito_id
        WHERE h.usuario_id = $1 
@@ -106,10 +102,10 @@ class HabitoRepository {
   }
 
   async update(id, usuarioId, dados) {
-    const { titulo, frequencia, xp_recompensa, dias_semana } = dados;
+    const { titulo, frequencia, xp_recompensa, dias_semana, meta_diaria } = dados;
     const result = await pool.query(
-      'UPDATE habitos SET titulo = $1, frequencia = $2, xp_recompensa = $3, dias_semana = $4 WHERE id = $5 AND usuario_id = $6 RETURNING *',
-      [titulo, frequencia, xp_recompensa, dias_semana, id, usuarioId]
+      'UPDATE habitos SET titulo = $1, frequencia = $2, xp_recompensa = $3, dias_semana = $4, meta_diaria = $5 WHERE id = $6 AND usuario_id = $7 RETURNING *',
+      [titulo, frequencia, xp_recompensa, dias_semana, meta_diaria, id, usuarioId]
     );
     return result.rows[0];
   }
