@@ -87,7 +87,7 @@ export default function HabitoModal({ isOpen, onClose, onSave, initialData = nul
                 <input 
                   type="number" min="1"
                   className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-brand-primary/50 outline-none transition-all"
-                  value={metaDiaria} onChange={e => setMetaDiaria(parseInt(e.target.value) || 1)}
+                  value={metaDiaria} onChange={e => setMetaDiaria(e.target.value)}
                 />
                 <span className="absolute right-5 top-1/2 -translate-y-1/2 font-black text-brand-primary text-xs tracking-widest">VEZES</span>
               </div>
@@ -111,7 +111,8 @@ export default function HabitoModal({ isOpen, onClose, onSave, initialData = nul
                 notify('Nome Inválido', 'Por favor, dê um nome ao seu hábito.', 'error');
                 return;
               }
-              onSave({ titulo, xp_recompensa: xp, dias_semana: diasSelecionados.join(','), meta_diaria: metaDiaria });
+              const metaFinal = parseInt(metaDiaria) || 1;
+              onSave({ titulo, xp_recompensa: xp, dias_semana: diasSelecionados.join(','), meta_diaria: metaFinal });
             }}
             className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-brand-primary/20 active:scale-[0.98] mt-4"
           >

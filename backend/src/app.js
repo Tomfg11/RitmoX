@@ -12,6 +12,9 @@ const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
+// Configuração para ambientes de produção como Render/Heroku (confiar no proxy reverso)
+app.set('trust proxy', 1);
+
 // Segurança: Adiciona cabeçalhos HTTP seguros
 app.use(helmet());
 
