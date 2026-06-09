@@ -36,6 +36,11 @@ app.use('/humor', humorRoutes);
 app.use('/admin', adminRoutes);
 app.use('/notifications', notificationRoutes);
 
+// Rota raiz de "Health Check" para serviços como Cron-job e UptimeRobot
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'RitmoX API Online e Acordada! 🚀' });
+});
+
 // Middleware de tratamento de erros global
 app.use((err, req, res, next) => {
   console.error('Erro não tratado:', err);
