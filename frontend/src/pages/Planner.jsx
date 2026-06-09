@@ -108,6 +108,14 @@ export default function Planner() {
   const eventos = tarefas.filter(t => !t.tipo || t.tipo === 'EVENTO');
   const tarefasSoltas = tarefas.filter(t => t.tipo === 'TAREFA');
 
+  // Helper para formatar data local no formato YYYY-MM-DD
+  const formatLocalISO = (dateObj) => {
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const d = String(dateObj.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -184,12 +192,11 @@ export default function Planner() {
             <div className="sticky top-[70px] z-20 bg-[#020617]/90 backdrop-blur-xl py-2 -mx-4 px-4 sm:mx-0 sm:px-0">
               <div className="flex md:hidden justify-between gap-2 overflow-x-auto scrollbar-hide pb-2">
                 {weekDays.map((day, idx) => {
-                  const dateStr = day.toISOString().split('T')[0];
+                  const dateStr = formatLocalISO(day);
                   const hasEventos = eventos.some(t => {
-                      const dataTarefa = typeof t.data === 'string' ? t.data : new Date(t.data).toISOString();
-                      return dataTarefa.split('T')[0] === dateStr;
+                      return formatLocalISO(new Date(t.data)) === dateStr;
                   });
-                  const isToday = new Date().toISOString().split('T')[0] === dateStr;
+                  const isToday = formatLocalISO(new Date()) === dateStr;
                   
                   return (
                     <button 
@@ -219,12 +226,11 @@ export default function Planner() {
           {/* Weekly View - Responsive Timeline/Grid */}
           <div className="flex flex-col md:grid md:grid-cols-7 gap-8 md:gap-4 mt-2 md:mt-6 pb-24 md:pb-0 animate-fade-in-up">
             {weekDays.map((day, idx) => {
-              const dateStr = day.toISOString().split('T')[0];
+              const dateStr = formatLocalISO(day);
               const tarefasDoDia = eventos.filter(t => {
-                const dataTarefa = typeof t.data === 'string' ? t.data : new Date(t.data).toISOString();
-                return dataTarefa.split('T')[0] === dateStr;
+                return formatLocalISO(new Date(t.data)) === dateStr;
               });
-              const isToday = new Date().toISOString().split('T')[0] === dateStr;
+              const isToday = formatLocalISO(new Date()) === dateStr;
 
               return (
                 <div 

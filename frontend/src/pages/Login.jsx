@@ -1,22 +1,26 @@
 import { useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
-import { LogIn, Mail, Lock } from 'lucide-react';
+import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
     async function handleSubmit(e) {
         e.preventDefault();
+        setIsLoading(true);
         try {
             await login(email, senha);
             navigate('/dashboard');
         } catch (error) {
             const mensagem = error.response?.data?.erro || "Erro ao logar.";
             alert(mensagem);
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -68,10 +72,20 @@ export default function Login() {
 
           <button 
             type="submit"
-            className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-brand-primary/25 active:scale-[0.98] mt-8 group"
+            disabled={isLoading}
+            className={`w-full text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-brand-primary/25 active:scale-[0.98] mt-8 group ${isLoading ? 'bg-slate-800 cursor-not-allowed' : 'bg-brand-primary hover:bg-brand-primary/90'}`}
           >
-            <span>ENTRAR NO RITMO</span>
-            <LogIn className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            {isLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>SINCRONIZANDO RITMO...</span>
+              </>
+            ) : (
+              <>
+                <span>ENTRAR NO RITMO</span>
+                <LogIn className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
           </button>
         </form>
 

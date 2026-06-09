@@ -308,7 +308,11 @@ export default function Dashboard() {
                         <CheckCircle2 className="w-4 h-4" />
                         CONCLUÍDO
                       </>
-                    ) : 'CONCLUIR'}
+                    ) : habito.meta_diaria > 1 ? (
+                      `CONCLUIR (${habito.progresso_hoje}/${habito.meta_diaria})`
+                    ) : (
+                      'CONCLUIR'
+                    )}
                   </button>
                 </div>
               </div>
