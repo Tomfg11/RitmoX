@@ -251,6 +251,44 @@ export default function Dashboard() {
         <section className="space-y-6">
           <div className="flex justify-between items-center px-2">
             <div>
+              <h3 className="text-xl font-bold text-white">Próximos Compromissos</h3>
+              <p className="text-slate-500 text-xs mt-1">O que você não pode esquecer esta semana.</p>
+            </div>
+            <Link to="/planner" className="text-brand-secondary text-sm font-bold hover:underline">Ver Agenda</Link>
+          </div>
+
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            {data.tarefas && data.tarefas.length > 0 ? (
+              data.tarefas.map(tarefa => (
+                <div key={tarefa.id} className={`min-w-[250px] glass-card p-5 rounded-3xl border-l-4 ${tarefa.prioridade === 'alta' ? 'border-l-red-500' : 'border-l-brand-secondary'}`}>
+                  <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${tarefa.prioridade === 'alta' ? 'text-red-500' : 'text-brand-secondary'}`}>
+                    {tarefa.prioridade === 'alta' ? 'Urgente' : 'Planejado'}
+                  </p>
+                  <h4 className="font-bold text-white mb-2">{tarefa.titulo}</h4>
+                  <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold">
+                    <CalendarIcon className="w-3 h-3" />
+                    <span>
+                      {new Date(tarefa.data).toLocaleDateString('pt-BR', { 
+                        day: '2-digit', 
+                        month: 'long',
+                        timeZone: 'America/Sao_Paulo'
+                      })}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="w-full py-8 flex flex-col items-center justify-center glass-card rounded-3xl border border-dashed border-white/10">
+                <CalendarIcon className="w-8 h-8 text-slate-700 mb-2" />
+                <p className="text-slate-500 text-sm font-medium">Nenhum compromisso marcado.</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="space-y-6">
+          <div className="flex justify-between items-center px-2">
+            <div>
               <h3 className="text-xl font-bold text-white">Hábitos de Hoje</h3>
               <p className="text-slate-500 text-xs mt-1">Mantenha a constância para evoluir.</p>
             </div>
@@ -317,44 +355,6 @@ export default function Dashboard() {
                 </div>
               </div>
             ))}
-          </div>
-        </section>
-
-        <section className="space-y-6">
-          <div className="flex justify-between items-center px-2">
-            <div>
-              <h3 className="text-xl font-bold text-white">Próximos Compromissos</h3>
-              <p className="text-slate-500 text-xs mt-1">O que você não pode esquecer esta semana.</p>
-            </div>
-            <Link to="/planner" className="text-brand-secondary text-sm font-bold hover:underline">Ver Agenda</Link>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-            {data.tarefas && data.tarefas.length > 0 ? (
-              data.tarefas.map(tarefa => (
-                <div key={tarefa.id} className={`min-w-[250px] glass-card p-5 rounded-3xl border-l-4 ${tarefa.prioridade === 'alta' ? 'border-l-red-500' : 'border-l-brand-secondary'}`}>
-                  <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${tarefa.prioridade === 'alta' ? 'text-red-500' : 'text-brand-secondary'}`}>
-                    {tarefa.prioridade === 'alta' ? 'Urgente' : 'Planejado'}
-                  </p>
-                  <h4 className="font-bold text-white mb-2">{tarefa.titulo}</h4>
-                  <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold">
-                    <CalendarIcon className="w-3 h-3" />
-                    <span>
-                      {new Date(tarefa.data).toLocaleDateString('pt-BR', { 
-                        day: '2-digit', 
-                        month: 'long',
-                        timeZone: 'America/Sao_Paulo'
-                      })}
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="w-full py-8 flex flex-col items-center justify-center glass-card rounded-3xl border border-dashed border-white/10">
-                <CalendarIcon className="w-8 h-8 text-slate-700 mb-2" />
-                <p className="text-slate-500 text-sm font-medium">Nenhum compromisso marcado.</p>
-              </div>
-            )}
           </div>
         </section>
       </div>
