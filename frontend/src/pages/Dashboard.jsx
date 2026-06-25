@@ -252,72 +252,50 @@ export default function Dashboard() {
           <div className="flex justify-between items-center px-2">
             <div>
               <h3 className="text-xl font-bold text-white">Próximos Compromissos</h3>
-              <p className="text-slate-500 text-xs mt-1">Seus eventos agendados.</p>
+              <p className="text-slate-500 text-xs mt-1">Sua agenda e pendências da semana.</p>
             </div>
             <Link to="/planner" className="text-brand-secondary text-sm font-bold hover:underline">Ver Agenda</Link>
           </div>
 
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-            {data.tarefas && data.tarefas.filter(t => t.tipo !== 'TAREFA').length > 0 ? (
-              data.tarefas.filter(t => t.tipo !== 'TAREFA').map(tarefa => (
-                <div key={tarefa.id} className={`min-w-[250px] glass-card p-5 rounded-3xl border-l-4 ${tarefa.prioridade === 'alta' ? 'border-l-red-500' : 'border-l-brand-secondary'}`}>
-                  <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${tarefa.prioridade === 'alta' ? 'text-red-500' : 'text-brand-secondary'}`}>
-                    {tarefa.prioridade === 'alta' ? 'Urgente' : 'Planejado'}
-                  </p>
-                  <h4 className="font-bold text-white mb-2">{tarefa.titulo}</h4>
-                  <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold">
-                    <CalendarIcon className="w-3 h-3" />
-                    <span>
-                      {new Date(tarefa.data).toLocaleDateString('pt-BR', { 
-                        day: '2-digit', 
-                        month: 'long',
-                        timeZone: 'America/Sao_Paulo'
-                      })}
-                    </span>
+            {data.tarefas && data.tarefas.length > 0 ? (
+              data.tarefas.map(tarefa => {
+                const isTarefa = tarefa.tipo === 'TAREFA';
+                return (
+                  <div key={tarefa.id} className={`min-w-[250px] glass-card p-5 rounded-3xl border-l-4 ${tarefa.prioridade === 'alta' ? 'border-l-red-500' : (isTarefa ? 'border-l-brand-primary' : 'border-l-brand-secondary')} relative overflow-hidden group`}>
+                    
+                    {/* Background subtle icon */}
+                    <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-500">
+                      {isTarefa ? <CheckCircle2 className="w-32 h-32" /> : <CalendarIcon className="w-32 h-32" />}
+                    </div>
+
+                    <div className="relative z-10">
+                      <div className="flex justify-between items-start mb-2">
+                        <p className={`text-[10px] font-black uppercase tracking-widest ${tarefa.prioridade === 'alta' ? 'text-red-500' : (isTarefa ? 'text-brand-primary' : 'text-brand-secondary')}`}>
+                          {tarefa.prioridade === 'alta' ? 'Urgente' : (isTarefa ? 'Tarefa' : 'Evento')}
+                        </p>
+                        <div className={`p-1.5 rounded-lg ${isTarefa ? 'bg-brand-primary/10 text-brand-primary' : 'bg-brand-secondary/10 text-brand-secondary'}`}>
+                          {isTarefa ? <CheckCircle2 className="w-4 h-4" /> : <CalendarIcon className="w-4 h-4" />}
+                        </div>
+                      </div>
+                      <h4 className="font-bold text-white mb-3 line-clamp-2">{tarefa.titulo}</h4>
+                      <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold">
+                        {isTarefa ? <CheckCircle2 className="w-3 h-3" /> : <CalendarIcon className="w-3 h-3" />}
+                        <span>
+                          {isTarefa 
+                            ? (tarefa.data_limite ? `Prazo: ${new Date(tarefa.data_limite).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}` : 'Sem prazo')
+                            : new Date(tarefa.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', timeZone: 'America/Sao_Paulo' })
+                          }
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="w-full py-8 flex flex-col items-center justify-center glass-card rounded-3xl border border-dashed border-white/10">
                 <CalendarIcon className="w-8 h-8 text-slate-700 mb-2" />
-                <p className="text-slate-500 text-sm font-medium">Nenhum compromisso marcado.</p>
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section className="space-y-6">
-          <div className="flex justify-between items-center px-2">
-            <div>
-              <h3 className="text-xl font-bold text-white">Suas Tarefas</h3>
-              <p className="text-slate-500 text-xs mt-1">Ações e pendências da semana.</p>
-            </div>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-            {data.tarefas && data.tarefas.filter(t => t.tipo === 'TAREFA').length > 0 ? (
-              data.tarefas.filter(t => t.tipo === 'TAREFA').map(tarefa => (
-                <div key={tarefa.id} className={`min-w-[250px] glass-card p-5 rounded-3xl border-l-4 ${tarefa.prioridade === 'alta' ? 'border-l-red-500' : 'border-l-brand-primary'}`}>
-                  <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${tarefa.prioridade === 'alta' ? 'text-red-500' : 'text-brand-primary'}`}>
-                    {tarefa.prioridade === 'alta' ? 'Urgente' : 'Tarefa'}
-                  </p>
-                  <h4 className="font-bold text-white mb-2">{tarefa.titulo}</h4>
-                  <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold">
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span>
-                      Prazo: {tarefa.data_limite ? new Date(tarefa.data_limite).toLocaleDateString('pt-BR', { 
-                        day: '2-digit', 
-                        month: 'long',
-                        timeZone: 'America/Sao_Paulo'
-                      }) : 'Sem prazo definido'}
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="w-full py-8 flex flex-col items-center justify-center glass-card rounded-3xl border border-dashed border-white/10">
-                <CheckCircle2 className="w-8 h-8 text-slate-700 mb-2" />
-                <p className="text-slate-500 text-sm font-medium">Nenhuma tarefa pendente.</p>
+                <p className="text-slate-500 text-sm font-medium">Nenhuma pendência ou compromisso.</p>
               </div>
             )}
           </div>
@@ -338,60 +316,101 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.habitos.map(habito => (
-              <div 
-                key={habito.id} 
-                className={`glass-card rounded-3xl p-5 border-l-4 transition-all duration-300 group ${habito.concluido_hoje ? 'border-l-green-500 bg-green-500/10 shadow-[0_0_25px_rgba(34,197,94,0.15)]' : 'border-l-transparent hover:border-l-brand-primary'}`}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all ${habito.concluido_hoje ? 'bg-green-500/20 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.3)]' : 'bg-slate-900 border-slate-800 group-hover:border-brand-primary/30 group-hover:bg-brand-primary/5'}`}>
-                      <Flame className={`w-6 h-6 ${habito.concluido_hoje ? 'text-green-400' : (habito.streak > 0 ? 'text-orange-500' : 'text-slate-600')}`} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-100 group-hover:text-brand-primary transition-colors">{habito.titulo}</h4>
-                      <div className="flex items-center gap-2">
-                         <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">{habito.xp_recompensa} XP</p>
-                         {habito.streak > 0 && (
-                            <span className="text-[9px] font-black text-orange-500 bg-orange-500/10 px-1.5 rounded-sm">🔥 {habito.streak}</span>
-                         )}
-                      </div>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => abrirModalResumo(habito)}
-                    className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
-                  >
-                    <PlusCircle className="w-5 h-5" />
-                  </button>
-                </div>
+          <div>
+            {(() => {
+              const periodos = ['Manhã', 'Tarde', 'Noite', 'Qualquer'];
+              const icons = { Manhã: '🌅', Tarde: '☀️', Noite: '🌙', Qualquer: '🕒' };
+              
+              const conteudos = periodos.map(periodo => {
+                const habitosDoPeriodo = data.habitos
+                  .filter(h => (h.periodo || 'Qualquer') === periodo)
+                  .sort((a, b) => b.xp_recompensa - a.xp_recompensa); // Alta prioridade primeiro
 
-                <div className="flex items-center justify-between mt-auto">
-                  <div className="flex -space-x-2">
-                    {[...Array(5)].map((_, i) => (
-                      <div key={i} className={`w-2.5 h-2.5 rounded-full border-2 border-slate-950 ${i < (habito.total_checkins % 6) ? 'bg-brand-primary' : 'bg-slate-800'}`}></div>
-                    ))}
+                if (habitosDoPeriodo.length === 0) return null;
+
+                return (
+                  <div key={periodo} className="mb-8 last:mb-0">
+                    <h4 className="text-xs font-black text-slate-500 mb-4 px-2 flex items-center gap-2 uppercase tracking-widest">
+                      <span className="text-base">{icons[periodo]}</span> {periodo}
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {habitosDoPeriodo.map(habito => (
+                        <div 
+                          key={habito.id} 
+                          className={`glass-card rounded-3xl p-5 border-l-4 transition-all duration-300 group ${habito.concluido_hoje ? 'border-l-green-500 bg-green-500/10 shadow-[0_0_25px_rgba(34,197,94,0.15)]' : 'border-l-transparent hover:border-l-brand-primary'}`}
+                        >
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all ${habito.concluido_hoje ? 'bg-green-500/20 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.3)]' : 'bg-slate-900 border-slate-800 group-hover:border-brand-primary/30 group-hover:bg-brand-primary/5'}`}>
+                                <Flame className={`w-6 h-6 ${habito.concluido_hoje ? 'text-green-400' : (habito.streak > 0 ? 'text-orange-500' : 'text-slate-600')}`} />
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-slate-100 group-hover:text-brand-primary transition-colors">{habito.titulo}</h4>
+                                <div className="flex items-center gap-2">
+                                   <p className={`text-[9px] font-bold uppercase tracking-wider ${habito.xp_recompensa >= 15 ? 'text-red-500' : (habito.xp_recompensa <= 5 ? 'text-slate-500' : 'text-brand-primary')}`}>{habito.xp_recompensa >= 15 ? 'ALTA' : (habito.xp_recompensa <= 5 ? 'BAIXA' : 'NORMAL')} ({habito.xp_recompensa} XP)</p>
+                                   {habito.streak > 0 && (
+                                      <span className="text-[9px] font-black text-orange-500 bg-orange-500/10 px-1.5 rounded-sm">🔥 {habito.streak}</span>
+                                   )}
+                                </div>
+                              </div>
+                            </div>
+                            <button 
+                              onClick={() => abrirModalResumo(habito)}
+                              className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                            >
+                              <PlusCircle className="w-5 h-5" />
+                            </button>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-auto">
+                            <div className="flex -space-x-2">
+                              {[...Array(5)].map((_, i) => (
+                                <div key={i} className={`w-2.5 h-2.5 rounded-full border-2 border-slate-950 ${i < (habito.total_checkins % 6) ? 'bg-brand-primary' : 'bg-slate-800'}`}></div>
+                              ))}
+                            </div>
+                            <button 
+                              onClick={() => !habito.concluido_hoje && handleCheckIn(habito.id)}
+                              disabled={habito.concluido_hoje}
+                              className={`px-6 py-2 text-xs font-black rounded-xl transition-all border shadow-sm active:scale-95 flex items-center gap-2 ${habito.concluido_hoje ? 'bg-green-500 border-green-500 text-white cursor-default' : 'bg-slate-900 hover:bg-brand-primary text-white border-slate-800 hover:border-brand-primary'}`}
+                            >
+                              {habito.concluido_hoje ? (
+                                <>
+                                  <CheckCircle2 className="w-4 h-4" />
+                                  CONCLUÍDO
+                                </>
+                              ) : habito.meta_diaria > 1 ? (
+                                `CONCLUIR (${habito.progresso_hoje}/${habito.meta_diaria})`
+                              ) : (
+                                'CONCLUIR'
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <button 
-                    onClick={() => !habito.concluido_hoje && handleCheckIn(habito.id)}
-                    disabled={habito.concluido_hoje}
-                    className={`px-6 py-2 text-xs font-black rounded-xl transition-all border shadow-sm active:scale-95 flex items-center gap-2 ${habito.concluido_hoje ? 'bg-green-500 border-green-500 text-white cursor-default' : 'bg-slate-900 hover:bg-brand-primary text-white border-slate-800 hover:border-brand-primary'}`}
-                  >
-                    {habito.concluido_hoje ? (
-                      <>
-                        <CheckCircle2 className="w-4 h-4" />
-                        CONCLUÍDO
-                      </>
-                    ) : habito.meta_diaria > 1 ? (
-                      `CONCLUIR (${habito.progresso_hoje}/${habito.meta_diaria})`
-                    ) : (
-                      'CONCLUIR'
-                    )}
-                  </button>
-                </div>
-              </div>
-            ))}
+                );
+              });
+
+              const temHabitos = conteudos.some(c => c !== null);
+              
+              if (!temHabitos) {
+                return (
+                  <div className="w-full py-12 flex flex-col items-center justify-center glass-card rounded-3xl border border-dashed border-white/10">
+                    <span className="text-4xl mb-4">🌱</span>
+                    <p className="text-slate-400 font-medium text-sm">Você ainda não tem nenhum hábito para hoje.</p>
+                    <button 
+                      onClick={() => setIsModalOpen(true)}
+                      className="mt-4 text-brand-primary font-bold text-sm hover:underline"
+                    >
+                      Criar meu primeiro hábito
+                    </button>
+                  </div>
+                );
+              }
+
+              return conteudos;
+            })()}
           </div>
         </section>
       </div>

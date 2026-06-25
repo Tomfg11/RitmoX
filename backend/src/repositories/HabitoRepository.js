@@ -20,10 +20,10 @@ class HabitoRepository {
     }));
   }
 
-  async create(usuarioId, titulo, frequencia, xp, diasSemana = null, metaDiaria = 1) {
+  async create(usuarioId, titulo, frequencia, xp, diasSemana = null, metaDiaria = 1, periodo = 'Qualquer') {
     const result = await pool.query(
-      'INSERT INTO habitos (usuario_id, titulo, frequencia, xp_recompensa, dias_semana, meta_diaria) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [usuarioId, titulo, frequencia, xp, diasSemana, metaDiaria]
+      'INSERT INTO habitos (usuario_id, titulo, frequencia, xp_recompensa, dias_semana, meta_diaria, periodo) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [usuarioId, titulo, frequencia, xp, diasSemana, metaDiaria, periodo]
     );
     return result.rows[0];
   }
@@ -102,10 +102,10 @@ class HabitoRepository {
   }
 
   async update(id, usuarioId, dados) {
-    const { titulo, frequencia, xp_recompensa, dias_semana, meta_diaria } = dados;
+    const { titulo, frequencia, xp_recompensa, dias_semana, meta_diaria, periodo } = dados;
     const result = await pool.query(
-      'UPDATE habitos SET titulo = $1, frequencia = $2, xp_recompensa = $3, dias_semana = $4, meta_diaria = $5 WHERE id = $6 AND usuario_id = $7 RETURNING *',
-      [titulo, frequencia, xp_recompensa, dias_semana, meta_diaria, id, usuarioId]
+      'UPDATE habitos SET titulo = $1, frequencia = $2, xp_recompensa = $3, dias_semana = $4, meta_diaria = $5, periodo = $6 WHERE id = $7 AND usuario_id = $8 RETURNING *',
+      [titulo, frequencia, xp_recompensa, dias_semana, meta_diaria, periodo, id, usuarioId]
     );
     return result.rows[0];
   }

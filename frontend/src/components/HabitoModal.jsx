@@ -5,9 +5,12 @@ import { useNotify } from '../contexts/NotificationContext';
 export default function HabitoModal({ isOpen, onClose, onSave, initialData = null }) {
   const { notify } = useNotify();
   const [titulo, setTitulo] = useState('');
-  const [xp, setXp] = useState(10);
+  const [prioridade, setPrioridade] = useState('Normal');
+  const [periodo, setPeriodo] = useState('Qualquer');
   const [diasSelecionados, setDiasSelecionados] = useState([]);
   const [metaDiaria, setMetaDiaria] = useState(1);
+
+  const xpMap = { Baixa: 5, Normal: 10, Alta: 15 };
 
   const diasDaSemana = [
     { id: '0', label: 'D' },
@@ -23,19 +26,26 @@ export default function HabitoModal({ isOpen, onClose, onSave, initialData = nul
   useEffect(() => {
     if (initialData) {
       setTitulo(initialData.titulo);
-      setXp(initialData.xp_recompensa);
+
+      const xpVal = initialData.xp_recompensa;
+      if (xpVal <= 5) setPrioridade('Baixa');
+      else if (xpVal >= 15) setPrioridade('Alta');
+      else setPrioridade('Normal');
+
       setDiasSelecionados(initialData.dias_semana ? initialData.dias_semana.split(',') : []);
       setMetaDiaria(initialData.meta_diaria || 1);
+      setPeriodo(initialData.periodo || 'Qualquer');
     } else {
       setTitulo('');
-      setXp(10);
+      setPrioridade('Normal');
+      setPeriodo('Qualquer');
       setDiasSelecionados([]);
       setMetaDiaria(1);
     }
   }, [initialData, isOpen]);
 
   const toggleDia = (id) => {
-    setDiasSelecionados(prev => 
+    setDiasSelecionados(prev =>
       prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
     );
   };
@@ -53,7 +63,7 @@ export default function HabitoModal({ isOpen, onClose, onSave, initialData = nul
         <div className="space-y-6">
           <div className="space-y-2">
             <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Nome do Hábito</label>
-            <input 
+            <input
               className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-brand-primary/50 outline-none transition-all placeholder:text-slate-700"
               value={titulo} onChange={e => setTitulo(e.target.value)}
               placeholder="Ex: Meditação Matinal"
@@ -67,11 +77,10 @@ export default function HabitoModal({ isOpen, onClose, onSave, initialData = nul
                 <button
                   key={dia.id}
                   onClick={() => toggleDia(dia.id)}
-                  className={`w-10 h-10 rounded-xl font-black text-xs transition-all ${
-                    diasSelecionados.includes(dia.id)
+                  className={`w-10 h-10 rounded-xl font-black text-xs transition-all ${diasSelecionados.includes(dia.id)
                       ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20'
                       : 'bg-slate-900 text-slate-500 border border-slate-800 hover:border-slate-600'
-                  }`}
+                    }`}
                 >
                   {dia.label}
                 </button>
@@ -80,39 +89,66 @@ export default function HabitoModal({ isOpen, onClose, onSave, initialData = nul
             <p className="text-[10px] text-slate-600 mt-1 ml-1">Se nenhum for selecionado, será diário.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
               <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Meta Diária</label>
               <div className="relative">
-                <input 
+                <input
                   type="number" min="1"
                   className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-brand-primary/50 outline-none transition-all"
                   value={metaDiaria} onChange={e => setMetaDiaria(e.target.value)}
                 />
-                <span className="absolute right-5 top-1/2 -translate-y-1/2 font-black text-brand-primary text-xs tracking-widest">VEZES</span>
+                <span className="absolute right-5 top-1/2 -translate-y-1/2 font-black text-brand-primary text-xs tracking-widest">VEZ</span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Recompensa</label>
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Período</label>
               <div className="relative">
-                <input 
-                  type="number"
-                  className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-brand-primary/50 outline-none transition-all"
-                  value={xp} onChange={e => setXp(e.target.value)}
-                />
-                <span className="absolute right-5 top-1/2 -translate-y-1/2 font-black text-brand-primary text-xs tracking-widest">XP</span>
+                <select
+                  className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-4 py-4 text-white focus:ring-2 focus:ring-brand-primary/50 outline-none transition-all appearance-none font-bold"
+                  value={periodo}
+                  onChange={e => setPeriodo(e.target.value)}
+                >
+                  <option value="Manhã">Manhã</option>
+                  <option value="Tarde">Tarde</option>
+                  <option value="Noite">Noite</option>
+                  <option value="Qualquer">Qualquer</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Prioridade</label>
+              <div className="relative">
+                <select
+                  className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl px-4 py-4 text-white focus:ring-2 focus:ring-brand-primary/50 outline-none transition-all appearance-none font-bold"
+                  value={prioridade}
+                  onChange={e => setPrioridade(e.target.value)}
+                >
+                  <option value="Baixa">Baixa</option>
+                  <option value="Normal">Normal</option>
+                  <option value="Alta">Alta</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
               </div>
             </div>
           </div>
-          <button 
+
+          <button
             onClick={() => {
               if (!titulo.trim()) {
                 notify('Nome Inválido', 'Por favor, dê um nome ao seu hábito.', 'error');
                 return;
               }
               const metaFinal = parseInt(metaDiaria) || 1;
-              onSave({ titulo, xp_recompensa: xp, dias_semana: diasSelecionados.join(','), meta_diaria: metaFinal });
+              const xpFinal = xpMap[prioridade] || 10;
+              onSave({ titulo, xp_recompensa: xpFinal, dias_semana: diasSelecionados.join(','), meta_diaria: metaFinal, periodo });
             }}
             className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-brand-primary/20 active:scale-[0.98] mt-4"
           >

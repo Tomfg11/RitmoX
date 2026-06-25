@@ -13,8 +13,13 @@ class HabitoController {
 
     async criar(req, res) {
         try {
-        const { titulo, frequencia, xp_recompensa, dias_semana, meta_diaria } = req.body;
-        const habito = await HabitoRepository.create(req.usuarioId, titulo, frequencia || 'personalizado', xp_recompensa, dias_semana, meta_diaria || 1);
+        const { titulo, frequencia, xp_recompensa, dias_semana, meta_diaria, periodo } = req.body;
+        
+        // Garante que o XP só pode ser 5, 10 ou 15
+        const xpPermitido = [5, 10, 15].includes(Number(xp_recompensa)) ? Number(xp_recompensa) : 10;
+        const periodoDefinido = periodo || 'Qualquer';
+
+        const habito = await HabitoRepository.create(req.usuarioId, titulo, frequencia || 'personalizado', xpPermitido, dias_semana, meta_diaria || 1, periodoDefinido);
         res.status(201).json(habito);
         } catch (e) {
         res.status(500).json({ erro: 'Erro ao criar hábito' });
@@ -61,12 +66,16 @@ class HabitoController {
             const habitoAtual = await HabitoRepository.findByIdAndUser(id, usuarioId);
             if (!habitoAtual) return res.status(404).json({ erro: 'Hábito não encontrado' });
 
+            const novoXp = req.body.xp_recompensa || habitoAtual.xp_recompensa;
+            const xpPermitido = [5, 10, 15].includes(Number(novoXp)) ? Number(novoXp) : 10;
+
             const dadosUpdate = {
                 titulo: req.body.titulo || habitoAtual.titulo,
                 frequencia: req.body.frequencia || habitoAtual.frequencia,
-                xp_recompensa: req.body.xp_recompensa || habitoAtual.xp_recompensa,
+                xp_recompensa: xpPermitido,
                 dias_semana: req.body.dias_semana !== undefined ? req.body.dias_semana : habitoAtual.dias_semana,
-                meta_diaria: req.body.meta_diaria !== undefined ? req.body.meta_diaria : habitoAtual.meta_diaria
+                meta_diaria: req.body.meta_diaria !== undefined ? req.body.meta_diaria : habitoAtual.meta_diaria,
+                periodo: req.body.periodo !== undefined ? req.body.periodo : (habitoAtual.periodo || 'Qualquer')
             };
 
             const habito = await HabitoRepository.update(id, usuarioId, dadosUpdate);
