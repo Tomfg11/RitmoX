@@ -89,7 +89,7 @@ class HabitoRepository {
     }));
 
     const tarefas = await pool.query(
-      'SELECT * FROM tarefas WHERE usuario_id = $1 AND concluida = false AND "data" >= CURRENT_DATE ORDER BY "data" ASC LIMIT 5',
+      'SELECT * FROM tarefas WHERE usuario_id = $1 AND concluida = false AND COALESCE(data_limite, "data") >= CURRENT_DATE ORDER BY COALESCE(data_limite, "data") ASC LIMIT 5',
       [usuarioId]
     );
 
