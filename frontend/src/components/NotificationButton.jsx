@@ -65,37 +65,16 @@ export default function NotificationButton() {
     }
   }
 
-  async function testPush() {
-    try {
-      await api.post('/notifications/test', { title: 'Teste Direto', body: 'O Web Push chegou no seu aparelho com sucesso!' });
-      alert('Comando enviado! Feche o app agora e veja se a notificação chega em alguns segundos.');
-    } catch (error) {
-      console.error('Erro no testPush:', error);
-      alert('Falha ao enviar comando de teste.');
-    }
-  }
-
   if (!isSupported) return null;
 
   return (
-    <div className="flex items-center gap-2">
-      {isSubscribed && (
-        <button 
-          onClick={testPush}
-          title="Testar Push"
-          className="text-[10px] uppercase font-bold text-brand-primary border border-brand-primary/30 px-3 py-1 rounded-full hover:bg-brand-primary/10 transition-all"
-        >
-          Testar
-        </button>
-      )}
-      <button 
-        onClick={subscribeUser}
-        disabled={isSubscribed}
-        title={isSubscribed ? "Notificações Ativas" : "Ativar Notificações"}
-        className={`p-2 rounded-full transition-all flex items-center justify-center ${isSubscribed ? 'text-brand-primary bg-brand-primary/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
-      >
-        {isSubscribed ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
-      </button>
-    </div>
+    <button 
+      onClick={subscribeUser}
+      disabled={isSubscribed}
+      title={isSubscribed ? "Notificações Ativas" : "Ativar Notificações"}
+      className={`p-2 rounded-full transition-all flex items-center justify-center ${isSubscribed ? 'text-brand-primary bg-brand-primary/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+    >
+      {isSubscribed ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
+    </button>
   );
 }
